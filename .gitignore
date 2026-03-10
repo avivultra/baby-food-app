@@ -1,0 +1,4 @@
+﻿/db.php
+node_modules/
+.vscode/
+.env

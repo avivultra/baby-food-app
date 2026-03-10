@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מעקב תינוקות</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1.5rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-pink-500 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-baby mr-2"></i> מעקב התינוק שלנו</h1>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-4 max-w-md">
+
+        <!-- Dashboard / Summary -->
+        <div class="card bg-gradient-to-r from-pink-50 to-purple-50 border-l-4 border-pink-400">
+            <h2 class="text-lg font-bold mb-3 text-pink-700">סיכום יומי</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center bg-white p-2 rounded shadow-sm">
+                    <p class="text-xs text-gray-500">נשאב היום</p>
+                    <p class="font-bold text-lg text-purple-600" id="dash-pumped">0 מ"ל</p>
+                </div>
+                <div class="text-center bg-white p-2 rounded shadow-sm">
+                    <p class="text-xs text-gray-500">אכל מבקבוק היום</p>
+                    <p class="font-bold text-lg text-blue-600" id="dash-bottle">0 מ"ל</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-sm">
+                <p class="mb-1"><span class="font-semibold text-gray-700">האכלה אחרונה:</span> <span id="dash-last-feed" class="text-gray-600">טוען...</span></p>
+                <p><span class="font-semibold text-gray-700">שאיבה אחרונה:</span> <span id="dash-last-pump" class="text-gray-600">טוען...</span></p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-3 gap-2 mb-6">
+            <button onclick="openModal('nursingModal')" class="bg-blue-400 hover:bg-blue-500 text-white py-3 rounded-xl shadow transition duration-200 flex flex-col items-center justify-center">
+                <i class="fa-solid fa-person-breastfeeding text-2xl mb-1"></i>
+                <span class="text-sm font-medium">הנקה</span>
+            </button>
+            <button onclick="openModal('bottleModal')" class="bg-green-400 hover:bg-green-500 text-white py-3 rounded-xl shadow transition duration-200 flex flex-col items-center justify-center">
+                <i class="fa-solid fa-bottle-droplet text-2xl mb-1"></i>
+                <span class="text-sm font-medium">בקבוק</span>
+            </button>
+            <button onclick="openModal('pumpingModal')" class="bg-purple-400 hover:bg-purple-500 text-white py-3 rounded-xl shadow transition duration-200 flex flex-col items-center justify-center">
+                <i class="fa-solid fa-pump-medical text-2xl mb-1"></i>
+                <span class="text-sm font-medium">שאיבה</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Nursing Modal -->
+    <div id="nursingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4 border-b pb-2">הנקה חדשה</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">זמן התחלה</label>
+                <input type="datetime-local" id="nursing-start" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">צד</label>
+                <select id="nursing-side" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+                    <option value="left">שמאל</option>
+                    <option value="right">ימין</option>
+                    <option value="both">שניהם</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">הערות</label>
+                <input type="text" id="nursing-notes" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+            </div>
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button onclick="closeModal('nursingModal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md">ביטול</button>
+                <button onclick="saveNursing()" class="px-4 py-2 text-white bg-blue-500 rounded-md">שמור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottle Modal -->
+    <div id="bottleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4 border-b pb-2">האכלה מבקבוק</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">זמן</label>
+                <input type="datetime-local" id="bottle-start" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">כמות (מ"ל)</label>
+                <input type="number" id="bottle-amount" class="w-full border-gray-300 rounded-md shadow-sm p-2 border" placeholder="לדוגמא: 120">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">הערות</label>
+                <input type="text" id="bottle-notes" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+            </div>
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button onclick="closeModal('bottleModal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md">ביטול</button>
+                <button onclick="saveBottle()" class="px-4 py-2 text-white bg-green-500 rounded-md">שמור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pumping Modal -->
+    <div id="pumpingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4 border-b pb-2">שאיבה חדשה</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">זמן התחלה</label>
+                <input type="datetime-local" id="pumping-start" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">כמות (מ"ל)</label>
+                <input type="number" id="pumping-amount" class="w-full border-gray-300 rounded-md shadow-sm p-2 border" placeholder="לדוגמא: 150">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">צד</label>
+                <select id="pumping-side" class="w-full border-gray-300 rounded-md shadow-sm p-2 border">
+                    <option value="both">שניהם</option>
+                    <option value="left">שמאל</option>
+                    <option value="right">ימין</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button onclick="closeModal('pumpingModal')" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md">ביטול</button>
+                <button onclick="savePumping()" class="px-4 py-2 text-white bg-purple-500 rounded-md">שמור</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
