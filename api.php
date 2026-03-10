@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
             "last_feeding" => null,
             "last_pumping" => null,
             "today_pumped_ml" => 0,
-            "today_bottle_ml" => 0, "today_nursing_count" => 0, "today_nursing_avg_time" => "00:00", "recent_history" => []
+            "today_bottle_ml" => 0, "today_nursing_count" => 0, "today_nursing_avg_time" => "00:00", "recent_history" => [], "last_sleep" => null, "today_sleep_time" => "00:00"
         ];
 
         // 1. ׳§׳‘׳׳× ׳”׳׳›׳׳” ׳׳—׳¨׳•׳ ׳”
@@ -68,6 +68,36 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
                 $avg_m = floor($avg_seconds / 60);
                 $avg_s = $avg_seconds % 60;
                 $data["today_nursing_avg_time"] = sprintf("%02d:%02d", $avg_m, $avg_s);
+            }
+        }
+
+        
+        // Last sleep
+        $res = $conn->query("SELECT * FROM sleeps ORDER BY start_time DESC LIMIT 1");
+        if ($res && $row = $res->fetch_assoc()) {
+            $data["last_sleep"] = $row;
+        }
+
+        // Today total sleep time
+        $res = $conn->query("SELECT start_time, end_time FROM sleeps WHERE DATE(start_time) = CURDATE() OR DATE(end_time) = CURDATE()");
+        $total_sleep_mins = 0;
+        if($res) {
+            while($row = $res->fetch_assoc()) {
+                $start = strtotime($row["start_time"]);
+                $end = strtotime($row["end_time"]);
+                
+                // If sleep started yesterday but ended today, only count today's part
+                $today_start = strtotime("today");
+                if($start < $today_start) $start = $today_start;
+                
+                if($end > $start) {
+                    $total_sleep_mins += round(($end - $start) / 60);
+                }
+            }
+            if($total_sleep_mins > 0) {
+                $h = floor($total_sleep_mins / 60);
+                $m = $total_sleep_mins % 60;
+                $data["today_sleep_time"] = $h > 0 ? "{$h} שעות ו-{$m} דקות" : "{$m} דקות";
             }
         }
 
@@ -172,6 +202,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 $conn->close();
 ?>
+
+
 
 
 

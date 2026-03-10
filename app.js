@@ -219,6 +219,13 @@ async function loadDashboard() {
             lastPumpText = `${formatDateTime(data.last_pumping.start_time)} - ${data.last_pumping.amount_ml} מ"ל`;
         }
         document.getElementById("dash-last-pump").textContent = lastPumpText;
+        
+        let lastSleepText = "אין נתונים היום";
+        if (data.last_sleep) {
+            lastSleepText = `${formatDateTime(data.last_sleep.start_time)} עד ${formatDateTime(data.last_sleep.end_time)}`;
+        }
+        if(document.getElementById("dash-last-sleep")) document.getElementById("dash-last-sleep").textContent = lastSleepText;
+        if(document.getElementById("dash-sleep-total")) document.getElementById("dash-sleep-total").textContent = data.today_sleep_time || "0 דקות";
 
         renderHistory(data.recent_history || []);
 
@@ -316,6 +323,7 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
 
 
 

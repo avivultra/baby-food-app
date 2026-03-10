@@ -66,6 +66,10 @@
                 <i class="fa-solid fa-chart-pie text-pink-400"></i> סיכום היום
             </h2>
             <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="text-center bg-indigo-50 p-3 rounded-xl col-span-2 mb-2">
+                    <p class="text-xs text-indigo-500 mb-1 font-bold">זמן שינה כולל היום</p>
+                    <p class="font-black text-xl text-indigo-700" id="dash-sleep-total">0 דקות</p>
+                </div>
                 <div class="text-center bg-gray-50 p-3 rounded-xl col-span-2 flex justify-between items-center px-6">
                     <div class="text-right">
                         <p class="text-xs text-gray-500 mb-1">הנקות היום</p>
@@ -94,6 +98,10 @@
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-gray-500"><i class="fa-solid fa-pump-medical text-gray-400 w-5"></i> שאיבה אחרונה:</span> 
                     <span id="dash-last-pump" class="font-medium text-gray-800 bg-purple-50 px-2 py-1 rounded-md">טוען...</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500"><i class="fa-solid fa-moon text-indigo-400 w-5"></i> ישן לאחרונה:</span> 
+                    <span id="dash-last-sleep" class="font-medium text-gray-800 bg-indigo-50 px-2 py-1 rounded-md">טוען...</span>
                 </div>
             </div>
         </div>
@@ -263,6 +271,8 @@
     <script src="app.js"></script>
 </body>
 </html>
+
+
 
 
 
