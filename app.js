@@ -1,4 +1,4 @@
-﻿const API_URL = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, "") + "/api.php";
+﻿const API_URL = "api.php";
 
 // פונקציית עזר לעיצוב תאריך נוכחי עבור אינפוט מסוג datetime-local
 function getCurrentDateTimeLocal() {
@@ -120,6 +120,7 @@ async function sendPostRequest(action, data) {
 
 // הפעלת טעינת הדשבורד עם עליית העמוד
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
 
 
 
