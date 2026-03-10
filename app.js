@@ -38,6 +38,10 @@ function openModal(id) {
         document.getElementById("diaper-start").value = getCurrentDateTimeLocal();
         setDiaperType(""); // איפוס
     }
+    if(id === "sleepModal") {
+        document.getElementById("sleep-start").value = getCurrentDateTimeLocal();
+        document.getElementById("sleep-end").value = getCurrentDateTimeLocal();
+    }
 }
 
 function closeModal(id) {
@@ -176,6 +180,16 @@ async function saveDiaper() {
     closeModal("diaperModal");
 }
 
+async function saveSleep() {
+    const data = {
+        start_time: document.getElementById("sleep-start").value,
+        end_time: document.getElementById("sleep-end").value
+    };
+    if(!data.start_time || !data.end_time) { alert("יש להזין זמני התחלה וסיום!"); return; }
+    await sendPostRequest("add_sleep", data);
+    closeModal("sleepModal");
+}
+
 async function deleteRecord(table, id) {
     if(confirm("למחוק את הרשומה הזו?")) {
         await sendPostRequest("delete_record", { table, id });
@@ -241,6 +255,15 @@ function renderHistory(historyArray) {
             icon = "fa-baby-carriage"; title = "טיטול"; colorClass = "text-orange-500 bg-orange-50";
             let dType = item.event_type === "pee" ? "פיפי 💧" : item.event_type === "poop" ? "קקי 💩" : "שניהם ✌️";
             details = dType;
+        } else if(item.table_name === "sleeps") {
+            icon = "fa-moon"; title = "שינה"; colorClass = "text-indigo-500 bg-indigo-50";
+            const sStart = new Date(item.time);
+            const sEnd = new Date(item.end_time);
+            const diffMins = Math.round((sEnd - sStart) / 60000);
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            let timeStrDiff = h > 0 ? `${h} שעות ו-${m} דקות` : `${m} דקות`;
+            details = `${formatDateTime(item.time)} עד ${formatDateTime(item.end_time)} (${timeStrDiff})`;
         }
 
         list.innerHTML += `
@@ -279,4 +302,7 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+
+
 

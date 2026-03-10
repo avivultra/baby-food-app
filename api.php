@@ -82,6 +82,9 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         $diapers = $conn->query("SELECT id, 'diapers' as table_name, type as event_type, time, null as amount_ml, null as side FROM diapers WHERE DATE(time) = CURDATE()");
         while($row = $diapers->fetch_assoc()) { $history[] = $row; }
 
+        $sleeps = $conn->query("SELECT id, 'sleeps' as table_name, 'sleep' as event_type, start_time as time, end_time, null as amount_ml, null as side FROM sleeps WHERE DATE(start_time) = CURDATE() OR DATE(end_time) = CURDATE()");
+        while($row = $sleeps->fetch_assoc()) { $history[] = $row; }
+
         usort($history, function($a, $b) {
             return strtotime($b["time"]) - strtotime($a["time"]);
         });
@@ -136,11 +139,24 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         } else {
             echo json_encode(["success" => false, "error" => $stmt->error]);
         }
+    } elseif ($action === "add_sleep") {
+        $start_time = $input["start_time"];
+        $end_time = $input["end_time"];
+        $notes = isset($input["notes"]) ? $input["notes"] : "";
+
+        $stmt = $conn->prepare("INSERT INTO sleeps (start_time, end_time, notes) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $start_time, $end_time, $notes);
+        
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true, "id" => $stmt->insert_id]);
+        } else {
+            echo json_encode(["success" => false, "error" => $stmt->error]);
+        }
     } elseif ($action === "delete_record") {
         $table = $input["table"];
         $id = (int)$input["id"];
         
-        if (in_array($table, ["feedings", "pumpings", "diapers"])) {
+        if (in_array($table, ["feedings", "pumpings", "diapers", "sleeps"])) {
             $stmt = $conn->prepare("DELETE FROM $table WHERE id = ?");
             $stmt->bind_param("i", $id);
             if ($stmt->execute()) {
@@ -156,6 +172,9 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 $conn->close();
 ?>
+
+
+
 
 
 
