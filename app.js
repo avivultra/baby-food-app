@@ -57,6 +57,18 @@ function closeModal(id) {
 }
 
 // טיימר הנקה
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if(!modal) return;
+    const content = modal.children[0];
+    content.classList.add("translate-y-full");
+    setTimeout(() => { modal.classList.add("hidden"); }, 300);
+    
+    if(id === "nursingModal" && isNursingTimerRunning) {
+        console.log("Timer is still running in background");
+    }
+}
+
 function openNursingModal() {
     openModal("nursingModal");
     if(!isNursingTimerRunning && nursingSeconds === 0) {
@@ -323,6 +335,7 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
 
 
 
