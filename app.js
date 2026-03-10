@@ -230,11 +230,13 @@ async function loadDashboard() {
 function renderHistory(historyArray) {
     const list = document.getElementById("history-list");
     list.innerHTML = "";
+    const sleepList = document.getElementById("sleep-history-list");
+    sleepList.innerHTML = "";
 
-    if(historyArray.length === 0) {
-        list.innerHTML = `<p class="text-center text-gray-400 text-sm py-4">לא הוזנו נתונים היום</p>`;
-        return;
-    }
+    let hasGeneral = false;
+    let hasSleep = false;
+
+    
 
     historyArray.forEach(item => {
         let icon = "", title = "", details = "", colorClass = "";
@@ -266,7 +268,8 @@ function renderHistory(historyArray) {
             details = `${formatDateTime(item.time)} עד ${formatDateTime(item.end_time)} (${timeStrDiff})`;
         }
 
-        list.innerHTML += `
+        
+        const htmlStr = `
             <div class="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-100 shadow-sm mb-2">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center ${colorClass}">
@@ -280,7 +283,18 @@ function renderHistory(historyArray) {
                 <button onclick="deleteRecord('${item.table_name}', ${item.id})" class="text-gray-300 hover:text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
+
+        if(item.table_name === "sleeps") {
+            sleepList.innerHTML += htmlStr;
+            hasSleep = true;
+        } else {
+            list.innerHTML += htmlStr;
+            hasGeneral = true;
+        }
+        
     });
+    if(!hasGeneral) list.innerHTML = `<p class="text-center text-gray-400 text-sm py-4">לא הוזנו נתוני תזונה/טיטולים היום</p>`;
+    if(!hasSleep) sleepList.innerHTML = `<p class="text-center text-gray-400 text-sm py-4">לא הוזנו נתוני שינה היום</p>`;
 }
 
 async function sendPostRequest(action, data) {
@@ -302,6 +316,10 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+
+
+
 
 
 
