@@ -122,7 +122,44 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         $data["recent_history"] = $history;
         echo json_encode($data);
     }
-} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
+} elseif ($action === "get_weekly_stats") {
+        $data = ["success" => true, "averages" => ["nursing" => 0, "sleep_hours" => 0, "bottle_ml" => 0, "diapers" => 0], "chart" => ["labels" => [], "data" => []]];
+        
+        // Past 7 days labels
+        for($i=6; $i>=0; $i--) {
+            $date = date("Y-m-d", strtotime("-$i days"));
+            $data["chart"]["labels"][] = date("d/m", strtotime($date));
+            $data["chart"]["data"][$date] = 0;
+        }
+
+        // Daily bottle/pumped feeding ML for the chart
+        $res = $conn->query("SELECT DATE(start_time) as d, SUM(amount_ml) as total FROM feedings WHERE type='bottle' AND start_time >= DATE(NOW() - INTERVAL 7 DAY) GROUP BY d");
+        if($res) { while($row = $res->fetch_assoc()) { if(isset($data["chart"]["data"][$row["d"]])) $data["chart"]["data"][$row["d"]] += (int)$row["total"]; } }
+        
+        // Convert chart data to simple array
+        $data["chart"]["data"] = array_values($data["chart"]["data"]);
+
+        // Averages (last 7 days)
+        $res = $conn->query("SELECT COUNT(*) as total FROM feedings WHERE type='nursing' AND start_time >= DATE(NOW() - INTERVAL 7 DAY)");
+        if($res && $row = $res->fetch_assoc()) $data["averages"]["nursing"] = round($row["total"] / 7, 1);
+
+        $res = $conn->query("SELECT SUM(amount_ml) as total FROM feedings WHERE type='bottle' AND start_time >= DATE(NOW() - INTERVAL 7 DAY)");
+        if($res && $row = $res->fetch_assoc()) $data["averages"]["bottle_ml"] = round($row["total"] / 7);
+
+        $res = $conn->query("SELECT COUNT(*) as total FROM diapers WHERE time >= DATE(NOW() - INTERVAL 7 DAY)");
+        if($res && $row = $res->fetch_assoc()) $data["averages"]["diapers"] = round($row["total"] / 7, 1);
+
+        $res = $conn->query("SELECT start_time, end_time FROM sleeps WHERE start_time >= DATE(NOW() - INTERVAL 7 DAY)");
+        $total_sleep_mins = 0;
+        if($res) {
+            while($row = $res->fetch_assoc()) {
+                $total_sleep_mins += round((strtotime($row["end_time"]) - strtotime($row["start_time"])) / 60);
+            }
+            $data["averages"]["sleep_hours"] = round(($total_sleep_mins / 60) / 7, 1);
+        }
+
+        echo json_encode($data);
+    } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     $input = json_decode(file_get_contents("php://input"), true);
     
     if ($action === "add_feeding") {
@@ -202,6 +239,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 $conn->close();
 ?>
+
 
 
 

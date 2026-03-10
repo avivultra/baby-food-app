@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>סטטיסטיקות והיסטוריה</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: "Heebo", sans-serif; background-color: #fcf9f2; }
+        .card { background: white; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="text-gray-800 pb-20">
+    <!-- Navbar -->
+    <nav class="bg-white p-4 shadow-sm sticky top-0 z-40 rounded-b-3xl mb-4">
+        <div class="container mx-auto flex justify-between items-center px-2">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="bg-gray-100 p-2 rounded-full text-gray-500 hover:text-pink-500 transition">
+                    <i class="fa-solid fa-arrow-right text-xl"></i>
+                </a>
+                <h1 class="text-xl font-extrabold text-gray-800">דוחות וסטטיסטיקות</h1>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 max-w-md">
+
+        <!-- Chart Card -->
+        <div class="card p-5 mb-6 border border-pink-100">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-gray-700">
+                <i class="fa-solid fa-chart-column text-pink-400"></i> כמות ארוחות (מ"ל) - 7 ימים
+            </h2>
+            <div class="w-full h-48">
+                <canvas id="feedingChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Weekly Summary -->
+        <div class="card p-5 mb-6 border border-blue-100">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-blue-900">
+                <i class="fa-solid fa-calendar-week text-blue-400"></i> ממוצעים לשבוע האחרון
+            </h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center bg-blue-50 p-3 rounded-xl">
+                    <p class="text-xs text-blue-500 mb-1 font-bold">הנקות ביום</p>
+                    <p class="font-black text-xl text-blue-700" id="stat-avg-nursing">0</p>
+                </div>
+                <div class="text-center bg-indigo-50 p-3 rounded-xl">
+                    <p class="text-xs text-indigo-500 mb-1 font-bold">שעות שינה ביום</p>
+                    <p class="font-black text-xl text-indigo-700" id="stat-avg-sleep">0</p>
+                </div>
+                <div class="text-center bg-green-50 p-3 rounded-xl">
+                    <p class="text-xs text-green-500 mb-1 font-bold">אכל מבקבוק</p>
+                    <p class="font-black text-xl text-green-700" id="stat-avg-bottle">0 מ"ל</p>
+                </div>
+                <div class="text-center bg-orange-50 p-3 rounded-xl">
+                    <p class="text-xs text-orange-500 mb-1 font-bold">טיטולים ביום</p>
+                    <p class="font-black text-xl text-orange-700" id="stat-avg-diapers">0</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "api.php";
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}?action=get_weekly_stats`);
+                const data = await response.json();
+                
+                if(data.success) {
+                    // Update texts
+                    document.getElementById("stat-avg-nursing").textContent = data.averages.nursing;
+                    document.getElementById("stat-avg-sleep").textContent = data.averages.sleep_hours;
+                    document.getElementById("stat-avg-bottle").textContent = data.averages.bottle_ml + " מ\"ל";
+                    document.getElementById("stat-avg-diapers").textContent = data.averages.diapers;
+
+                    // Draw chart
+                    const ctx = document.getElementById("feedingChart").getContext("2d");
+                    new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: data.chart.labels,
+                            datasets: [{
+                                label: "כמות תמ\"ל/שאוב (מ\"ל)",
+                                data: data.chart.data,
+                                backgroundColor: "rgba(244, 114, 182, 0.6)",
+                                borderColor: "rgba(244, 114, 182, 1)",
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading stats:", error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadStats);
+    </script>
+</body>
+</html>
