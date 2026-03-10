@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -19,33 +19,50 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
             "last_feeding" => null,
             "last_pumping" => null,
             "today_pumped_ml" => 0,
-            "today_bottle_ml" => 0
+            "today_bottle_ml" => 0, "recent_history" => []
         ];
 
-        // 1. קבלת האכלה אחרונה
+        // 1. ׳§׳‘׳׳× ׳”׳׳›׳׳” ׳׳—׳¨׳•׳ ׳”
         $res = $conn->query("SELECT * FROM feedings ORDER BY start_time DESC LIMIT 1");
         if ($res && $row = $res->fetch_assoc()) {
             $data["last_feeding"] = $row;
         }
 
-        // 2. קבלת שאיבה אחרונה
+        // 2. ׳§׳‘׳׳× ׳©׳׳™׳‘׳” ׳׳—׳¨׳•׳ ׳”
         $res = $conn->query("SELECT * FROM pumpings ORDER BY start_time DESC LIMIT 1");
         if ($res && $row = $res->fetch_assoc()) {
             $data["last_pumping"] = $row;
         }
 
-        // 3. כמות שאובה היום
+        // 3. ׳›׳׳•׳× ׳©׳׳•׳‘׳” ׳”׳™׳•׳
         $res = $conn->query("SELECT SUM(amount_ml) as total FROM pumpings WHERE DATE(start_time) = CURDATE()");
         if ($res && $row = $res->fetch_assoc()) {
             $data["today_pumped_ml"] = (int)$row["total"];
         }
 
-        // 4. כמות תמ"ל/בקבוק היום
+        // 4. ׳›׳׳•׳× ׳×׳"׳/׳‘׳§׳‘׳•׳§ ׳”׳™׳•׳
         $res = $conn->query("SELECT SUM(amount_ml) as total FROM feedings WHERE type='bottle' AND DATE(start_time) = CURDATE()");
         if ($res && $row = $res->fetch_assoc()) {
             $data["today_bottle_ml"] = (int)$row["total"];
         }
 
+        
+        // 5. Recent history (Today)
+        $history = [];
+        $feedings = $conn->query("SELECT id, 'feedings' as table_name, type as event_type, start_time as time, amount_ml, side FROM feedings WHERE DATE(start_time) = CURDATE()");
+        while($row = $feedings->fetch_assoc()) { $history[] = $row; }
+        
+        $pumpings = $conn->query("SELECT id, 'pumpings' as table_name, 'pumping' as event_type, start_time as time, amount_ml, side FROM pumpings WHERE DATE(start_time) = CURDATE()");
+        while($row = $pumpings->fetch_assoc()) { $history[] = $row; }
+
+        $diapers = $conn->query("SELECT id, 'diapers' as table_name, type as event_type, time, null as amount_ml, null as side FROM diapers WHERE DATE(time) = CURDATE()");
+        while($row = $diapers->fetch_assoc()) { $history[] = $row; }
+
+        usort($history, function($a, $b) {
+            return strtotime($b["time"]) - strtotime($a["time"]);
+        });
+        
+        $data["recent_history"] = $history;
         echo json_encode($data);
     }
 } elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -82,10 +99,42 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         } else {
             echo json_encode(["success" => false, "error" => $stmt->error]);
         }
+    } elseif ($action === "add_diaper") {
+        $time = $input["time"];
+        $type = $input["type"];
+        $notes = isset($input["notes"]) ? $input["notes"] : "";
+
+        $stmt = $conn->prepare("INSERT INTO diapers (time, type, notes) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $time, $type, $notes);
+        
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true, "id" => $stmt->insert_id]);
+        } else {
+            echo json_encode(["success" => false, "error" => $stmt->error]);
+        }
+    } elseif ($action === "delete_record") {
+        $table = $input["table"];
+        $id = (int)$input["id"];
+        
+        if (in_array($table, ["feedings", "pumpings", "diapers"])) {
+            $stmt = $conn->prepare("DELETE FROM $table WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            if ($stmt->execute()) {
+                echo json_encode(["success" => true]);
+            } else {
+                echo json_encode(["success" => false, "error" => $stmt->error]);
+            }
+        } else {
+            echo json_encode(["success" => false, "error" => "Invalid table"]);
+        }
     }
 }
 
 $conn->close();
 ?>
+
+
+
+
 
 
