@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
             "last_feeding" => null,
             "last_pumping" => null,
             "today_pumped_ml" => 0,
-            "today_bottle_ml" => 0, "recent_history" => []
+            "today_bottle_ml" => 0, "today_nursing_count" => 0, "today_nursing_avg_time" => "00:00", "recent_history" => []
         ];
 
         // 1. ׳§׳‘׳׳× ׳”׳׳›׳׳” ׳׳—׳¨׳•׳ ׳”
@@ -47,6 +47,30 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         }
 
         
+        
+        // Nursing average time and count today
+        $res = $conn->query("SELECT notes FROM feedings WHERE type='nursing' AND DATE(start_time) = CURDATE()");
+        $total_seconds = 0;
+        $count = 0;
+        if($res) {
+            while($row = $res->fetch_assoc()) {
+                // Parse "משך: MM:SS"
+                if(preg_match('/(\d{2}):(\d{2})/', $row["notes"], $matches)) {
+                    $m = (int)$matches[1];
+                    $s = (int)$matches[2];
+                    $total_seconds += ($m * 60) + $s;
+                    $count++;
+                }
+            }
+            $data["today_nursing_count"] = $count;
+            if($count > 0) {
+                $avg_seconds = floor($total_seconds / $count);
+                $avg_m = floor($avg_seconds / 60);
+                $avg_s = $avg_seconds % 60;
+                $data["today_nursing_avg_time"] = sprintf("%02d:%02d", $avg_m, $avg_s);
+            }
+        }
+
         // 5. Recent history (Today)
         $history = [];
         $feedings = $conn->query("SELECT id, 'feedings' as table_name, type as event_type, start_time as time, amount_ml, side FROM feedings WHERE DATE(start_time) = CURDATE()");
@@ -132,6 +156,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 
 $conn->close();
 ?>
+
+
 
 
 

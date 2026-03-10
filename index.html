@@ -61,6 +61,16 @@
                 <i class="fa-solid fa-chart-pie text-pink-400"></i> סיכום היום
             </h2>
             <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="text-center bg-gray-50 p-3 rounded-xl col-span-2 flex justify-between items-center px-6">
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500 mb-1">הנקות היום</p>
+                        <p class="font-black text-xl text-blue-600"><span id="dash-nursing-count">0</span> <span class="text-sm font-normal text-gray-400">פעמים</span></p>
+                    </div>
+                    <div class="text-left border-r border-gray-200 pr-6">
+                        <p class="text-xs text-gray-500 mb-1">זמן ממוצע להנקה</p>
+                        <p class="font-black text-xl text-blue-500" id="dash-nursing-avg">00:00</p>
+                    </div>
+                </div>
                 <div class="text-center bg-gray-50 p-3 rounded-xl">
                     <p class="text-xs text-gray-500 mb-1">נשאב היום</p>
                     <p class="font-black text-xl text-purple-600" id="dash-pumped">0 מ"ל</p>
@@ -216,3 +226,4 @@
     <script src="app.js"></script>
 </body>
 </html>
+

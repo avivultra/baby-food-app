@@ -190,6 +190,8 @@ async function loadDashboard() {
         
         document.getElementById("dash-pumped").textContent = `${data.today_pumped_ml || 0} מ"ל`;
         document.getElementById("dash-bottle").textContent = `${data.today_bottle_ml || 0} מ"ל`;
+        if(document.getElementById("dash-nursing-count")) document.getElementById("dash-nursing-count").textContent = data.today_nursing_count || 0;
+        if(document.getElementById("dash-nursing-avg")) document.getElementById("dash-nursing-avg").textContent = data.today_nursing_avg_time || "00:00";
 
         let lastFeedText = "אין נתונים היום";
         if (data.last_feeding) {
@@ -277,3 +279,4 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
