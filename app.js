@@ -30,7 +30,7 @@ function closeModal(id) {
 // קריאה לנתוני הדשבורד מהשרת
 async function loadDashboard() {
     try {
-        const response = await fetch(`${API_URL}?action=get_dashboard_data`);
+        const response = await fetch(`${API_URL}?action=get_dashboard_data`, { headers: { "ngrok-skip-browser-warning": "true" } });
         const data = await response.json();
         
         document.getElementById("dash-pumped").textContent = `${data.today_pumped_ml || 0} מ"ל`;
@@ -101,7 +101,7 @@ async function sendPostRequest(action, data) {
     try {
         const response = await fetch(`${API_URL}?action=${action}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
             body: JSON.stringify(data)
         });
         const result = await response.json();
@@ -120,4 +120,5 @@ async function sendPostRequest(action, data) {
 
 // הפעלת טעינת הדשבורד עם עליית העמוד
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
 
