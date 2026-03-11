@@ -44,20 +44,7 @@ function openModal(id) {
     }
 }
 
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    const content = modal.children[0];
-    content.classList.add("translate-y-full");
-    setTimeout(() => { modal.classList.add("hidden"); }, 300);
-    
-    if(id === "nursingModal" && isNursingTimerRunning) {
-        // אם סגרנו חלון הנקה והטיימר רץ, תן אזהרה קטנה
-        console.log("Timer is still running in background");
-    }
-}
-
-// טיימר הנקה
-function closeModal(id) {
+function closeModal {
     const modal = document.getElementById(id);
     if(!modal) return;
     const content = modal.children[0];
@@ -335,6 +322,19 @@ async function sendPostRequest(action, data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadDashboard);
+
+// Scroll to top button logic
+window.addEventListener("scroll", () => {
+    const scrollBtn = document.getElementById("btn-scroll-up");
+    if(!scrollBtn) return;
+    if (window.scrollY > 200) {
+        scrollBtn.classList.remove("opacity-0", "translate-y-10", "pointer-events-none");
+    } else {
+        scrollBtn.classList.add("opacity-0", "translate-y-10", "pointer-events-none");
+    }
+});
+
+
 
 
 
