@@ -26,7 +26,7 @@ function formatTimeLength(seconds) {
 // ניהול מודלים (חלונות קופצים)
 function openModal(id) {
     const modal = document.getElementById(id);
-    modal.classList.remove("hidden");
+    if(!modal) return; modal.classList.remove("hidden");
     
     // אנימציית החלקה למעלה
     const content = modal.children[0];
@@ -44,7 +44,7 @@ function openModal(id) {
     }
 }
 
-function closeModal {
+function closeModal(id) {
     const modal = document.getElementById(id);
     if(!modal) return;
     const content = modal.children[0];
@@ -55,6 +55,8 @@ function closeModal {
         console.log("Timer is still running in background");
     }
 }
+
+
 
 function openNursingModal() {
     openModal("nursingModal");
@@ -324,6 +326,19 @@ async function sendPostRequest(action, data) {
 document.addEventListener("DOMContentLoaded", loadDashboard);
 
 // Scroll to top button logic
+
+const themeCheckbox = document.querySelector('.theme-controller');
+if(themeCheckbox) {
+    const currentTheme = localStorage.getItem("theme") || "cupcake";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    themeCheckbox.checked = currentTheme === "dracula";
+
+    themeCheckbox.addEventListener("change", (e) => {
+        const theme = e.target.checked ? "dracula" : "cupcake";
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+    });
+}
 window.addEventListener("scroll", () => {
     const scrollBtn = document.getElementById("btn-scroll-up");
     if(!scrollBtn) return;
@@ -333,6 +348,10 @@ window.addEventListener("scroll", () => {
         scrollBtn.classList.add("opacity-0", "translate-y-10", "pointer-events-none");
     }
 });
+
+
+
+
 
 
 
